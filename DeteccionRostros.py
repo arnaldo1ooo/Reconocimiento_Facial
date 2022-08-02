@@ -11,6 +11,34 @@ def cerrar():
     capturador_video.release()
     cv2.destroyAllWindows()
 
+def mostrarPuntoCentral():
+    for id, coordenadasXY in enumerate(result_rostros.detections):
+        # Conversion de decimal a coordenada
+        altoFrame, anchoFrame, c = frame.shape
+
+        # Extraer x & y inicial
+        x = coordenadasXY.location_data.relative_bounding_box.xmin
+        y = coordenadasXY.location_data.relative_bounding_box.ymin
+
+        # Extraer ancho y alto
+        ancho = coordenadasXY.location_data.relative_bounding_box.width
+        alto = coordenadasXY.location_data.relative_bounding_box.height
+
+        # Conversion a pixeles
+        xInicial, yInicial = int(x * anchoFrame), int(y * altoFrame)
+        xFinal, yFinal = int(ancho * anchoFrame), int(alto * altoFrame)
+
+        # Extraer el punto central de nuestro rostro
+        xCentral = (xInicial + (xInicial + xFinal)) // 2
+        yCentral = (yInicial + (yInicial + yFinal)) // 2
+
+        # Mostrar coordenadas
+        tamPunto = 8;
+        cv2.circle(frame, (xCentral, yCentral), tamPunto, (255, 0, 255), cv2.FILLED)
+
+        # Mostramos las coordenadas
+        print("Coordenadas: X:", xInicial, " Y:", yFinal)
+
 #---------- Declaraciones ----------
 TECLA_SALIR = 27 #Tecla esc
 TIEMPO_LECTURA_TECLA = 1
@@ -43,6 +71,8 @@ with detector.FaceDetection(min_detection_confidence = NIVEL_DETECCION) as rostr
             #Recorre los rostros detectados
             for rostro in result_rostros.detections:
                 dibujo.draw_detection(frame, rostro, dibujo.DrawingSpec(color=color_puntos))
+
+                mostrarPuntoCentral()
 
         if(isExito):
             # Mostramos los fotogramas
